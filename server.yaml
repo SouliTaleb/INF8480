@@ -28,15 +28,11 @@ parameters:
     constraints:
       - custom_constraint: nova.flavor
 
-  # Replace the default value by the id of your public neutron network.
   network:
     type: string
     default: 9ec556ab-d458-470e-96bc-1bab0ef66fb9
     description: Network ID to use for the instance.
-    constraints:
-      - custom_constraint: neutron.network
 
-  # Replace the default value by the id of your private neutron subnet.
   subnet:
     type: string
     description: ID of private sub network into which servers get deployed
@@ -44,7 +40,7 @@ parameters:
 
   pool_id:
     type: string
-    description: ID of the pool to contact
+    description: Pool to contact
 
   metadata:
     type: json
@@ -53,17 +49,11 @@ parameters:
     type: string
     description: Server user_data
 
-  pool_member_port:
-    type: number
-    description: Port used by the pool member
-
 resources:
 
-  # The server to be deployed on the distant virtual machine.
   server:
     type: OS::Nova::Server
     properties:
-      name: DistantServer
       flavor: {get_param: flavor}
       image: {get_param: image}
       key_name: {get_param: key_name}
@@ -77,5 +67,5 @@ resources:
     properties:
       pool: {get_param: pool_id}
       address: { get_attr: [ server, first_address ]}
-      protocol_port: {get_param: pool_member_port}
+      protocol_port: 8080
       subnet: { get_param: subnet }
