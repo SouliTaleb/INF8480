@@ -1,0 +1,81 @@
+heat_template_version: 2015-10-15
+
+description: >
+  HOT template to deploy servers into an existing neutron tenant network.
+  The servers will work hand on hand with the load balancer.
+
+parameters:
+
+  # Replace the default value by your key name.
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: cle
+    constraints:
+      - custom_constraint: nova.keypair
+
+  image:
+    type: string
+    description: Name of image to use for server
+    default: xenial-server-cloudimg-amd64-disk1
+    constraints:
+      - custom_constraint: glance.image
+
+  flavor:
+    type: string
+    description: Flavor to use for server
+    default: 2048-10-1-1
+    constraints:
+      - custom_constraint: nova.flavor
+
+  # Replace the default value by the id of your public neutron network.
+  network:
+    type: string
+    default: 9ec556ab-d458-470e-96bc-1bab0ef66fb9
+    description: Network ID to use for the instance.
+    constraints:
+      - custom_constraint: neutron.network
+
+  # Replace the default value by the id of your private neutron subnet.
+  subnet:
+    type: string
+    description: ID of private sub network into which servers get deployed
+    default: 4ba321db-9247-454b-9274-faad8ec76461
+
+  pool_id:
+    type: string
+    description: ID of the pool to contact
+
+  metadata:
+    type: json
+
+  user_data:
+    type: string
+    description: Server user_data
+
+  pool_member_port:
+    type: number
+    description: Port used by the pool member
+
+resources:
+
+  # The server to be deployed on the distant virtual machine.
+  server:
+    type: OS::Nova::Server
+    properties:
+      name: DistantServer
+      flavor: {get_param: flavor}
+      image: {get_param: image}
+      key_name: {get_param: key_name}
+      metadata: {get_param: metadata}
+      user_data: {get_param: user_data}
+      user_data_format: RAW
+      networks: [{network: {get_param: private_net_id} }]
+
+  pool_member:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: pool_id}
+      address: { get_attr: [ server, first_address ]}
+      protocol_port: {get_param: pool_member_port}
+      subnet: { get_param: private_subnet_id }
