@@ -29,7 +29,7 @@ parameters:
       - custom_constraint: nova.flavor
 
   # Replace the default value by the id of your public neutron network.
-  network:
+  private_net_id:
     type: string
     default: 9ec556ab-d458-470e-96bc-1bab0ef66fb9
     description: Network ID to use for the instance.
@@ -37,7 +37,7 @@ parameters:
       - custom_constraint: neutron.network
 
   # Replace the default value by the id of your private neutron subnet.
-  subnet:
+  private_net_id:
     type: string
     description: ID of private sub network into which servers get deployed
     default: 4ba321db-9247-454b-9274-faad8ec76461
